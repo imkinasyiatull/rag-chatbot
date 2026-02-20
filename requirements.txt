@@ -1,5 +1,6 @@
-langchain
-langchain-google-genai
 streamlit
-sentence-transformers
 chromadb
+sentence-transformers
+pypdf
+langchain-text-splitters
+groq
