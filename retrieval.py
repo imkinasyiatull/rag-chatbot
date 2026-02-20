@@ -1,32 +1,42 @@
-import os
 import chromadb
+from chromadb.errors import NotFoundError
 from sentence_transformers import SentenceTransformer
 from groq import Groq
+import os
 
 class Embedder:
     def __init__(self):
         self.model = SentenceTransformer("all-MiniLM-L6-v2")
+
     def __call__(self, input):
         return self.model.encode(input).tolist()
+
     def embed_query(self, input):
         return self.model.encode(input).tolist()
+
     def embed_documents(self, input):
         return self.model.encode(input).tolist()
+
     def name(self):
         return "all-MiniLM-L6-v2"
 
-def build_db(chunks, metas, ids):
+
+def build_db(chunks, metas, ids, collection_name="docs", reset=True):
     client = chromadb.Client()
     emb = Embedder()
+
+    if reset:
+        try:
+            client.delete_collection(collection_name)
+        except Exception:
+            pass
+
     col = client.get_or_create_collection(
-        name="docs",
+        name=collection_name,
         embedding_function=emb
     )
-    col.add(
-        documents=chunks,
-        metadatas=metas,
-        ids=ids
-    )
+
+    col.add(documents=chunks, metadatas=metas, ids=ids)
     return col
 
 def retrieve(col, q):
